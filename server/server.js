@@ -1,5 +1,6 @@
 const express = require('express');
 const { ApolloServer, gql } = require('apollo-server-express');
+const cors = require('cors');
 
 const { typeDefs, resolvers } = require('./schemas/index');
 
@@ -12,6 +13,7 @@ const server = new ApolloServer({
     // context: AuthMiddleware
 });
 server.applyMiddleware({ app });
+app.use(cors())
 
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(express.json({ limit: '50mb'}));
