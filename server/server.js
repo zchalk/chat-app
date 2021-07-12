@@ -5,6 +5,9 @@ const { execute, subscribe } = require('graphql');
 const db = require('./config/config');
 const { SubscriptionServer } = require('subscriptions-transport-ws');
 const { createServer } = require('http');
+const { PubSub } = require('graphql-subscriptions');
+
+const pubsub = new PubSub();
 
 const { typeDefs, resolvers } = require('./schemas/index');
 
@@ -14,7 +17,8 @@ const app = express();
 const server = new ApolloServer({
     typeDefs,
     resolvers,
-    subscriptions: `ws://localhost:${PORT}/subscriptions`
+    subscriptions: `ws://localhost:${PORT}/subscriptions`,
+    context: { pubsub }
     // context: AuthMiddleware
 });
 server.applyMiddleware({ app });
@@ -42,6 +46,8 @@ db.once('open', () => {
     //  });
     // });
 })
+
+module.export = pubsub;
 
 
 

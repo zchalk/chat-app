@@ -1,14 +1,13 @@
 const { gql } = require('apollo-server-express')
 const Message = require('../models/Message')
 const User = require('../models/User')
-const { PubSub } = require('graphql-subscriptions');
+const pubsub = require('../server');
 
-const pubsub = new PubSub();
 
 const postMessage = async (parent, args, { req, pubsub }) => {      //parent mutation type
     if (args.input.content.trim() === "") throw new Error('Content is required')
     //const currentUser = await authCheck(req)
-    const currentUser = 'test2@test.com'
+    const currentUser = 'test3@test.com'
     const currentUserMongoId = await User.findOne({
         email: currentUser
     })
@@ -24,7 +23,7 @@ const postMessage = async (parent, args, { req, pubsub }) => {      //parent mut
 const allMessages = async (parent, args) => {
     const messages = await Message.find({})
     console.log(messages)
-    return await Message.find({})//.populate('postUser', 'username _id')
+    return await Message.find({}).populate('postUser', 'username _id')
 
 }
 const allUsers = async (parent, args) => {
