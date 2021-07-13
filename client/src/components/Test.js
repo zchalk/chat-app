@@ -35,6 +35,7 @@ const Test = () => {
   //CRUD Apollo
   const { loading, error, data } = useQuery(GET_USERS);
   const { subscribeToMore, loading: postsLoad, error: postsErr, data: allMessages } = useQuery(ALL_MESSAGES);
+  console.log(allMessages);
   console.log(subscribeToMore)
   const [postMessage] = useMutation(POST_MESSAGE);
   //const { loading: subLoading, error: subErr, data: subData } = useSubscription(LISTEN_POSTS);

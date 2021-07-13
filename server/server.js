@@ -1,5 +1,7 @@
 const express = require('express');
-const { ApolloServer, gql } = require('apollo-server-express');
+const  {
+      ApolloServer
+    } = require('apollo-server-express');
 const cors = require('cors');
 const { execute, subscribe } = require('graphql');
 const db = require('./config/config');
@@ -9,7 +11,7 @@ const { PubSub } = require('graphql-subscriptions');
 
 const pubsub = new PubSub();
 
-const { typeDefs, resolvers } = require('./schemas/index');
+const {typeDefs, resolvers } = require('./schemas/index');
 
 
 const PORT = process.env.PORT || 4000;
@@ -23,28 +25,39 @@ const server = new ApolloServer({
 });
 server.applyMiddleware({ app });
 app.use(cors())
+// app.use('*', cors({ origin: `http://localhost:${PORT}` }));
+
+// app.use('/graphql',  ApolloServer({
+//   schema, context: { pubsub }
+// }));
+
+// app.use('/graphiql', graphiqlExpress({
+//   endpointURL: '/graphql',
+//   subscriptionsEndpoint: `ws://localhost:${PORT}/subscriptions`
+// }));
+
 
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(express.json({ limit: '50mb'}));
 
 
 db.once('open', () => {
-    const myServer = app.listen(PORT, () => {
-        console.log(`API server running on port ${PORT}!`);
-    }) 
-    // const ws = createServer(myServer);
-    // ws.listen(PORT, () => {
-    // console.log(`Use GraphQL at http://localhost:${PORT}${server.graphqlPath}`);
-    // new SubscriptionServer({
-    //     execute,
-    //     subscribe,
-    //     typeDefs,
-    //     resolvers
-    //   }, {
-    //     server: ws,
-    //     path: '/subscriptions',
-    //  });
-    // });
+    const ws = createServer(app);
+    ws.listen(PORT, () => {
+      console.log(`Apollo Server is now running on http://localhost:${PORT}`, app, ws);
+      // Set up the WebSocket for handling GraphQL subscriptions
+      const subServer = new SubscriptionServer({
+        execute,
+        subscribe,
+        typeDefs, 
+        resolvers
+      }, {
+        server: ws,
+        path: '/subscriptions',
+      });
+      console.log('HERE IS SUB SERVER:', subServer);
+    });
+    
 })
 
 module.export = pubsub;
@@ -102,13 +115,13 @@ module.export = pubsub;
 //   schema
 // }));
 
-// server.use('/graphiql', graphiqlExpress({
+// app.use('/graphiql', graphiqlExpress({
 //   endpointURL: '/graphql',
 //   subscriptionsEndpoint: `ws://localhost:${PORT}/subscriptions`
 // }));
 
-// // Wrap the Express server
-// const ws = createServer(server);
+// // Wrap the Express app
+// const ws = createServer(app);
 // ws.listen(PORT, () => {
 //   console.log(`Apollo Server is now running on http://localhost:${PORT}`);
 //   // Set up the WebSocket for handling GraphQL subscriptions
